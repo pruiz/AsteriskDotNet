@@ -297,6 +297,36 @@ namespace Asterisk.NET
 		}
 		#endregion
 
+		internal enum PropertyMask
+		{
+			WithGet = (1<<0),
+			WithSet = (1<<1),
+			WithGetAndSet = WithGet & WithSet
+		}
+
+		internal static Dictionary<string, PropertyInfo> GetProperties(Type @class, PropertyMask with)
+		{
+			PropertyInfo property;
+
+			Dictionary<string, PropertyInfo> accessors = new Dictionary<string, PropertyInfo>();
+			PropertyInfo[] methods = @class.GetProperties();
+
+			for (int i = 0; i < methods.Length; i++)
+			{
+				property = methods[i];
+
+				// Filter properties based on with parameter.
+				if (((with & PropertyMask.WithGet) != 0) && (property.CanRead == false))
+					continue;
+
+				if (((with & PropertyMask.WithSet) != 0) && (property.CanWrite == false))
+					continue;
+
+				accessors[property.Name] = property;
+			}
+			return accessors;
+		}
+
 		#region GetSetters(Type clazz) 
 		/// <summary>
 		/// Returns a Map of setter methods of the given class.<br/>
@@ -341,6 +371,7 @@ namespace Asterisk.NET
 			StringBuilder sb = new StringBuilder(obj.GetType().Name, 1024);
 			sb.Append(" {");
 			string strValue;
+			// TODO: Use GetProperties instead.
 			IDictionary getters = Helper.GetGetters(obj.GetType());
 			bool notFirst = false;
 			List<MethodInfo> arrays = new List<MethodInfo>();

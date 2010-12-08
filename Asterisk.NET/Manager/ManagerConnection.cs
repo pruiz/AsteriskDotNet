@@ -1802,10 +1802,12 @@ namespace Asterisk.NET.Manager
 		#region BuildAction(action, internalActionId)
 		public string BuildAction(ManagerAction action, string internalActionId)
 		{
-			MethodInfo getter;
+			PropertyInfo getter;
+			object[] attrs;
 			object value;
 			StringBuilder sb = new StringBuilder();
 			string valueAsString = string.Empty;
+			bool ignoreValue = false;
 
 			if (typeof(Action.ProxyAction).IsAssignableFrom(action.GetType()))
 				sb.Append(string.Concat("ProxyAction: ", action.Action, Common.LINE_SEPARATOR));
@@ -1820,7 +1822,7 @@ namespace Asterisk.NET.Manager
 			if (!string.IsNullOrEmpty(valueAsString))
 				sb.Append(string.Concat("ActionID: ", valueAsString, Common.LINE_SEPARATOR));
 
-			Dictionary<string, MethodInfo> getters = Helper.GetGetters(action.GetType());
+			Dictionary<string, PropertyInfo> getters = Helper.GetProperties(action.GetType(), Helper.PropertyMask.WithGet);
 
 			foreach (string name in getters.Keys)
 			{
@@ -1829,7 +1831,7 @@ namespace Asterisk.NET.Manager
 					continue;
 
 				getter = getters[name];
-				Type propType = getter.ReturnType;
+				Type propType = getter.PropertyType;
 				if (!(propType == typeof(string)
 					|| propType == typeof(bool)
 					|| propType == typeof(double)
@@ -1843,7 +1845,7 @@ namespace Asterisk.NET.Manager
 
 				try
 				{
-					value = getter.Invoke(action, new object[] { });
+					value = getter.GetValue(action, new object[] { });
 				}
 				catch (UnauthorizedAccessException ex)
 				{
@@ -1866,6 +1868,26 @@ namespace Asterisk.NET.Manager
 
 				if (value == null)
 					continue;
+
+				attrs = getter.GetCustomAttributes(typeof(ConditionIgnoreAttribute), true);
+
+				foreach (var item in attrs)
+				{
+					var attr = item as ConditionIgnoreAttribute;
+
+					if (attr.Value.Equals(value))
+					{
+						ignoreValue = true;
+						break;
+					}
+				}
+
+				if (ignoreValue)
+				{
+					ignoreValue = false;
+					continue;
+				}
+
 				if (value is string)
 				{
 					valueAsString = (string)value;

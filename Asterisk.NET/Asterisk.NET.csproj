@@ -2,7 +2,7 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProductVersion>8.0.50727</ProductVersion>
+    <ProductVersion>9.0.30729</ProductVersion>
     <SchemaVersion>2.0</SchemaVersion>
     <ProjectGuid>{BC6E7DBA-C05A-45FE-A2A3-B1637CE16274}</ProjectGuid>
     <OutputType>Library</OutputType>
@@ -12,7 +12,6 @@
     <FileUpgradeFlags>
     </FileUpgradeFlags>
     <OldToolsVersion>2.0</OldToolsVersion>
-    <TargetFrameworkVersion>v3.5</TargetFrameworkVersion>
     <UpgradeBackupLocation>
     </UpgradeBackupLocation>
   </PropertyGroup>
@@ -177,6 +176,7 @@
     <Compile Include="Manager\Event\QueueCallerAbandonEvent.cs" />
     <Compile Include="Manager\Event\MasqueradeEvent.cs" />
     <Compile Include="Manager\Exceptions\AuthenticationFailedException.cs" />
+    <Compile Include="Manager\ConditionIgnoreAttribute.cs" />
     <Compile Include="Manager\Response\GetConfigResponse.cs" />
     <Compile Include="Manager\Response\OriginateResponse.cs" />
     <Compile Include="Manager\ManagerConnection.cs" />

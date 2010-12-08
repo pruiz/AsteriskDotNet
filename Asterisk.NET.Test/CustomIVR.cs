@@ -6,7 +6,6 @@ namespace Asterisk.NET.Test
 	public class CustomIVR : AGIScript
 	{
 		private string escapeKeys = "0123456789*#";
-        private static string num = "8323687387";
 		/*
 		 * Call -> play "wellcome" -> wait digit 5 seconds -> press 1 -> play "press-1" -> wait digit -> press * ----------------------------\
 		 *               ^                    ^                                                 ^     -> press 4 -> play "press-4" -------\  |
@@ -29,7 +28,7 @@ namespace Asterisk.NET.Test
 		 *               |                    \--------------------------------------------------/                                           |
 		 *               \-------------------------------------------------------------------------------------------------------------------/
 		 */
-       
+
 		public override void Service(AGIRequest request, AGIChannel channel)
 		{
 			Answer();

@@ -2,6 +2,8 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 
+using Asterisk.NET.Manager;
+
 namespace Asterisk.NET.Manager.Action
 {
 	/// <summary>
@@ -110,6 +112,7 @@ namespace Asterisk.NET.Manager.Action
 		/// Get /Set the priority of the extension to connect to.
 		/// If you set the priority you also have to set the context and exten properties.
 		/// </summary>
+		[ConditionIgnoreAttribute(0)]
 		public int Priority
 		{
 			get { return priority; }
@@ -168,6 +171,7 @@ namespace Asterisk.NET.Manager.Action
 		/// is considered to have failed and an OriginateFailureEvent is generated.<br/>
 		/// If not set, Asterisk assumes a default value of 30000 meaning 30 seconds.
 		/// </summary>
+		[ConditionIgnoreAttribute(0)]
 		public int Timeout
 		{
 			get { return timeout; }

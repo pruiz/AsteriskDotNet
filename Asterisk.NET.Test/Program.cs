@@ -1,5 +1,4 @@
 using System;
-using System.Threading;
 
 using Asterisk.NET.Manager;
 using Asterisk.NET.Manager.Action;
@@ -11,123 +10,26 @@ namespace Asterisk.NET.Test
 {
 	class Program
 	{
-		const string DEV_HOST = "s131559.trixbox.fonality.com";
-        const int ASTERISK_PORT = 5038;
-        const string ASTERISK_HOST = "s131559.trixbox.fonality.com";
-		const string ASTERISK_LOGINNAME = "remote_mgr";
-		const string ASTERISK_LOGINPWD = "0chanc3yo";
+		const string DEV_HOST = "192.168.99.3";
+		const int ASTERISK_PORT = 5038;
+		const string ASTERISK_HOST = "192.168.99.3";
+		const string ASTERISK_LOGINNAME = "agent";
+		const string ASTERISK_LOGINPWD = "agentpw";
 
-		const string ORIGINATE_CONTEXT = "internal-invisible";
-        const string ORIGINATE_CHANNEL = @"Local/9793616700@internal";
-        const string ORIGINATE_EXTEN = "5713";
-
-        const string ORIGINATE_EXTRA_CHANNEL = @"SIP/SOFTPHONE001";
-        const string ORIGINATE_EXTRA_EXTEN = @"SIP/0004F21AED2C";
-		const string ORIGINATE_CALLERID = "Pager Testing";
-		const int ORIGINATE_TIMEOUT = 25000;
+		const string ORIGINATE_CONTEXT = "from-internal";
+		const string ORIGINATE_CHANNEL = "IAX2/100";
+		const string ORIGINATE_EXTRA_CHANNEL = "SIP/101";
+		const string ORIGINATE_EXTRA_EXTEN = "101";
+		const string ORIGINATE_EXTEN = "101";
+		const string ORIGINATE_CALLERID = "Asterisk.NET";
+		const int ORIGINATE_TIMEOUT = 15000;
 
 		[STAThread]
 		static void Main()
 		{
-            string PAGER_NUMBER = "9793616700";
-            string MESSAGE_NUMBER = "8323687387";
-            //callPager(PAGER_NUMBER,MESSAGE_NUMBER);
-
-            //Console.ReadLine();
 			checkManagerAPI();
 			checkFastAGI();
-            
 		}
-
-        private static void callPager(string pagerNum, string messageNum)
-        {
-            manager = new ManagerConnection(ASTERISK_HOST, ASTERISK_PORT, ASTERISK_LOGINNAME, ASTERISK_LOGINPWD);
-
-            // Register user event class
-            manager.RegisterUserEventClass(typeof(UserAgentLoginEvent));
-            // Add or Remove events
-            manager.UserEvents += new UserEventHandler(dam_UserEvents);
-            // Dont't display this event
-            manager.NewExten += new NewExtenEventHandler(manager_IgnoreEvent);
-            // Display all other
-            manager.UnhandledEvent += new ManagerEventHandler(dam_Events);
-            manager.PingInterval = 0;
-
-            try
-            {
-                manager.Login();			// Login only (fast)
-                Console.WriteLine("Asterisk version : " + manager.Version);
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine(ex);
-                Console.ReadLine();
-                manager.Logoff();
-                return;
-            }
-
-            {
-                //Console.WriteLine("\nGetConfig action");
-                ManagerResponse response = manager.SendAction(new GetConfigAction("manager.conf"));
-                if (response.IsSuccess())
-                {
-                    GetConfigResponse responseConfig = (GetConfigResponse)response;
-                    foreach (int key in responseConfig.Categories.Keys)
-                    {
-                        Console.WriteLine(string.Format("{0}:{1}", key, responseConfig.Categories[key]));
-                        foreach (int keyLine in responseConfig.Lines(key).Keys)
-                        {
-                            Console.WriteLine(string.Format("\t{0}:{1}", keyLine, responseConfig.Lines(key)[keyLine]));
-                        }
-                    }
-                }
-                else { }
-                Console.WriteLine(response);
-                
-            }
-            
-            {
-                // Console.WriteLine("\nUpdateConfig action");
-                UpdateConfigAction config = new UpdateConfigAction("manager.conf", "manager.conf");
-                config.AddCommand(UpdateConfigAction.ACTION_NEWCAT, "testadmin");
-                config.AddCommand(UpdateConfigAction.ACTION_APPEND, "testadmin", "secret", "blabla");
-                ManagerResponse response = manager.SendAction(config);
-                //Console.WriteLine(response);
-            }
-
-
-            OriginateAction oc = new OriginateAction();
-
-            oc.Context = ORIGINATE_CONTEXT;
-            oc.Priority = 1;
-            oc.Channel = @"SIP/SOFTPHONE001";
-            oc.CallerId = "Hello";
-            oc.Exten = "9793616700";
-            oc.Timeout = ORIGINATE_TIMEOUT;
-
-            ManagerResponse originateResponse = manager.SendAction(oc, oc.Timeout);
-
-
-
-    
-                
-                CommandAction ca = new CommandAction("Dial 9793616700,180,D(w8w3w2w3w6w8w7w3w8w7)");
-                ManagerResponse commandResponse = manager.SendAction(ca, ORIGINATE_TIMEOUT);
-                Console.WriteLine("Command Response:");
-                Console.WriteLine(commandResponse);
-
-           
-           
-
-       
-           
-            
-
-            Console.WriteLine("Hello Press ENTER key to next test.");
-            Console.ReadLine();
-
-
-        }
 
 		#region checkFastAGI()
 		private static void checkFastAGI()
@@ -143,7 +45,6 @@ See CustomIVR.cs and fastagi-mapping.resx to detail.
 Ctrl-C to exit");
 			AsteriskFastAGI agi = new AsteriskFastAGI();
 			agi.Start();
-            
 		}
 		#endregion
 
@@ -206,111 +107,8 @@ Ctrl-C to exit");
 		}
 		#endregion
 
-        #region 
-        public void makeCall(string channel, string exten, string id)
-        {
-            manager = new ManagerConnection(ASTERISK_HOST, ASTERISK_PORT, ASTERISK_LOGINNAME, ASTERISK_LOGINPWD);
-
-            // Register user event class
-            manager.RegisterUserEventClass(typeof(UserAgentLoginEvent));
-            // Add or Remove events
-            manager.UserEvents += new UserEventHandler(dam_UserEvents);
-            // Dont't display this event
-            manager.NewExten += new NewExtenEventHandler(manager_IgnoreEvent);
-            // Display all other
-            manager.UnhandledEvent += new ManagerEventHandler(dam_Events);
-            // +++ Only to debug purpose
-            manager.FireAllEvents = true;
-            // manager.DefaultEventTimeout = 0;
-            // manager.DefaultResponseTimeout = 0;
-            manager.PingInterval = 0;
-
-            try
-            {
-                manager.Login();			// Login only (fast)
-                Console.WriteLine("Asterisk version : " + manager.Version);
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine(ex);
-                Console.ReadLine();
-                manager.Logoff();
-                return;
-            }
-
-            {
-                //Console.WriteLine("\nGetConfig action");
-                ManagerResponse response = manager.SendAction(new GetConfigAction("manager.conf"));
-                if (response.IsSuccess())
-                {
-                    GetConfigResponse responseConfig = (GetConfigResponse)response;
-                    foreach (int key in responseConfig.Categories.Keys)
-                    {
-                        //Console.WriteLine(string.Format("{0}:{1}", key, responseConfig.Categories[key]));
-                        /*foreach (int keyLine in responseConfig.Lines(key).Keys)
-                        {
-                            Console.WriteLine(string.Format("\t{0}:{1}", keyLine, responseConfig.Lines(key)[keyLine]));
-                        }*/
-                    }
-                }
-                else { }
-                    //Console.WriteLine(response);
-            }
-
-            {
-               // Console.WriteLine("\nUpdateConfig action");
-                UpdateConfigAction config = new UpdateConfigAction("manager.conf", "manager.conf");
-                config.AddCommand(UpdateConfigAction.ACTION_NEWCAT, "testadmin");
-                config.AddCommand(UpdateConfigAction.ACTION_APPEND, "testadmin", "secret", "blabla");
-                ManagerResponse response = manager.SendAction(config);
-                //Console.WriteLine(response);
-            }
-
-            // Originate call example
-            //Console.WriteLine("\nPress ENTER key to originate call.\n"
-            //    + "Start phone (or connect) or make a call to see events.\n"
-            //    + "After all events press a key to originate call.");
-            //Console.ReadLine();
-            //while(true)
-            //{
-
-            OriginateAction oc = new OriginateAction();
-
-            oc.Context = ORIGINATE_CONTEXT;
-            oc.Priority = 1;
-            //Console.WriteLine("Channel: ");
-            oc.Channel = channel;
-            oc.CallerId = id;
-            oc.Exten = exten;
-            oc.Timeout = ORIGINATE_TIMEOUT;
-            // oc.Variable = "VAR1=abc|VAR2=def";
-            // oc.SetVariable("VAR3", "ghi");
-
-            /*string outnumber = "SOFTPHONE001"; 
-            string extension = "SIP/SOFTPHONE001";
-            OriginateAction action = new OriginateAction(); 
-            action.Exten = extension; 
-            //action.Channel = "LOCAL/98323687387";
-            action.Channel = @"Local/" + "8323687387" + "@from-internal";
-            action.Context = "from-local";
-            action.Priority = 1;
-            action.CallerId = "Sean you are lame";
-            action.Timeout = 30000;*/
-            ManagerResponse originateResponse = manager.SendAction(oc, oc.Timeout);
-
-
-            Console.WriteLine("Response:");
-            Console.WriteLine(originateResponse);
-
-
-            Console.WriteLine("Press ENTER key to next test.");
-            Console.ReadLine();
-        }
-
-        #endregion
-
-        #region checkManagerAPI()
-        private static void checkManagerAPI()
+		#region checkManagerAPI()
+		private static void checkManagerAPI()
 		{
 			manager = new ManagerConnection(ASTERISK_HOST, ASTERISK_PORT, ASTERISK_LOGINNAME, ASTERISK_LOGINPWD);
 
@@ -379,56 +177,22 @@ Ctrl-C to exit");
 				+ "Start phone (or connect) or make a call to see events.\n"
 				+ "After all events press a key to originate call.");
 			Console.ReadLine();
-            //while(true)
-            //{
 
-			    OriginateAction oc = new OriginateAction();
-    			
-                oc.Context = ORIGINATE_CONTEXT;
-			    oc.Priority = 1;
-                //Console.WriteLine("Channel: ");
-			    oc.Channel = ORIGINATE_CHANNEL;
-			    oc.CallerId = ORIGINATE_CALLERID;
-			    oc.Exten = ORIGINATE_EXTEN;
-			    oc.Timeout = ORIGINATE_TIMEOUT;
-			    // oc.Variable = "VAR1=abc|VAR2=def";
-			    // oc.SetVariable("VAR3", "ghi");
+			OriginateAction oc = new OriginateAction();
+			oc.Context = ORIGINATE_CONTEXT;
+			oc.Priority = 1;
+			oc.Channel = ORIGINATE_CHANNEL;
+			oc.CallerId = ORIGINATE_CALLERID;
+			oc.Exten = ORIGINATE_EXTEN;
+			oc.Timeout = ORIGINATE_TIMEOUT;
+			// oc.Variable = "VAR1=abc|VAR2=def";
+			// oc.SetVariable("VAR3", "ghi");
+			ManagerResponse originateResponse = manager.SendAction(oc, oc.Timeout);
+			Console.WriteLine("Response:");
+			Console.WriteLine(originateResponse);
 
-                /*string outnumber = "SOFTPHONE001"; 
-                string extension = "SIP/SOFTPHONE001";
-                OriginateAction action = new OriginateAction(); 
-                action.Exten = extension; 
-                //action.Channel = "LOCAL/98323687387";
-                action.Channel = @"Local/" + "8323687387" + "@from-internal";
-                action.Context = "from-local";
-                action.Priority = 1;
-                action.CallerId = "Sean you are lame";
-                action.Timeout = 30000;*/
-			    ManagerResponse originateResponse = manager.SendAction(oc, oc.Timeout);
-
-
-			    Console.WriteLine("Response:");
-			    Console.WriteLine(originateResponse);
-
-                
-			    Console.WriteLine("Press ENTER key to hear dial tones.");
-			    Console.ReadLine();
-
-            while(true)
-            {
-                Console.WriteLine("Enter command:\n");
-                string s = Console.ReadLine();
-                CommandAction ca = new CommandAction(s);
-                ManagerResponse commandResponse = manager.SendAction(ca, ORIGINATE_TIMEOUT);
-                Console.WriteLine("Command Response:");
-                Console.WriteLine(commandResponse);
-
-
-                Console.WriteLine("Press ENTER key to next test.");
-                Console.ReadLine();
-
-
-            }
+			Console.WriteLine("Press ENTER key to next test.");
+			Console.ReadLine();
 
 			//
 			// Display result of Show Queues command
