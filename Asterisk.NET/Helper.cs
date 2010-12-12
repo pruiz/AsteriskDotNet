@@ -520,14 +520,18 @@ namespace Asterisk.NET
 		internal static void SetAttributes(IParseSupport o, Dictionary<string, string> attributes)
 		{
 			Type dataType;
-			MethodInfo setter;
-			IDictionary setters = Helper.GetSetters(o.GetType());
 			object val;
 
+			// Preparse attributes
+			attributes = o.ParseSpecial(attributes);
+
+			IDictionary setters = Helper.GetSetters(o.GetType());
+			MethodInfo setter;
 			foreach (string name in attributes.Keys)
 			{
 				if (name == "event")
 					continue;
+
 				if (name == "source")
 					setter = (MethodInfo)setters["src"];
 				else
@@ -574,6 +578,22 @@ namespace Asterisk.NET
 						Decimal v = 0;
 						Decimal.TryParse((string)attributes[name], System.Globalization.NumberStyles.AllowDecimalPoint, Common.CultureInfoEn, out v);
 						val = v;
+					}
+					else if (dataType.IsEnum)
+					{
+						try
+						{
+							val = Convert.ChangeType(Enum.Parse(dataType, (string)attributes[name], true), dataType);
+						}
+						catch (Exception ex)
+						{
+#if LOGGER
+							logger.Error("Unable to convert value '" + attributes[name] + "' of property '" + name + "' on " + o.GetType() + " to required enum type " + dataType, ex);
+							continue;
+#else
+							throw new ManagerException("Unable to convert value '" + attributes[name] + "' of property '" + name + "' on " + o.GetType() + " to required enum type " + dataType, ex); #endif
+#endif
+						}
 					}
 					else
 					{

@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 
 namespace Asterisk.NET.Manager.Event
 {
@@ -50,6 +51,63 @@ namespace Asterisk.NET.Manager.Event
 		public BridgeEvent(ManagerConnection source)
 			: base(source)
 		{
+		}
+		#endregion
+
+		#region ParseSpecial(Dictionary<string, string> attributes)
+		/// <summary>
+		/// Unknown properties parser
+		/// </summary>
+		/// <param name="attributes">dictionary</param>
+		/// <returns>updated dictionary</returns>
+		public override Dictionary<string, string> ParseSpecial(Dictionary<string, string> attributes)
+		{
+			if (attributes == null)
+				return null;
+
+				Dictionary<string,string> updated = new Dictionary<string,string>(attributes.Count);
+				foreach(KeyValuePair<string, string> pair in attributes)
+				{
+					string value = pair.Value.ToLower(Helper.CultureInfo);
+					switch (pair.Key.ToLower(Helper.CultureInfo))
+					{
+						case "bridgestate":
+							switch(value)
+							{
+								case "link":
+									this.BridgeState = BridgeStates.BRIDGE_STATE_LINK;
+									break;
+								case "unlink":
+									this.BridgeState = BridgeStates.BRIDGE_STATE_UNLINK;
+									break;
+							}
+							break;
+
+						case "bridgetype":
+							switch (value)
+							{
+								case "rtp-native":
+									this.BridgeType = BridgeTypes.BRIDGE_TYPE_RTP_NATIVE;
+									break;
+								case "rtp-direct":
+									this.BridgeType = BridgeTypes.BRIDGE_TYPE_RTP_DIRECT;
+									break;
+								case "rtp-remote":
+									this.BridgeType = BridgeTypes.BRIDGE_TYPE_RTP_REMOTE;
+									break;
+								case "core":
+									this.BridgeType = BridgeTypes.BRIDGE_TYPE_CORE;
+									break;
+							}
+							break;
+
+						default:
+							updated.Add(pair.Key, pair.Value);
+							break;
+					}
+				}
+
+			return updated;
 		}
 		#endregion
 

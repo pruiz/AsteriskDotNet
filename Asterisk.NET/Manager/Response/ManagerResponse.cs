@@ -195,6 +195,18 @@ namespace Asterisk.NET.Manager.Response
 		}
 		#endregion
 
+		#region ParseSpecial(Dictionary<string, string> attributes)
+		/// <summary>
+		/// Unknown properties parser
+		/// </summary>
+		/// <param name="attributes">dictionary</param>
+		/// <returns>updated dictionary</returns>
+		public virtual Dictionary<string, string> ParseSpecial(Dictionary<string, string> attributes)
+		{
+			return attributes;
+		}
+		#endregion
+
 		#region ToString() 
 		public override string ToString()
 		{

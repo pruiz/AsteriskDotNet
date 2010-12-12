@@ -11,5 +11,6 @@ namespace Asterisk.NET
 			get;
 		}
 		bool Parse(string key, string value);
+		Dictionary<string, string> ParseSpecial(Dictionary<string, string> attributes);
 	}
 }

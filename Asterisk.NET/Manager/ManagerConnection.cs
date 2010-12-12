@@ -108,6 +108,7 @@ namespace Asterisk.NET.Manager
 		private string protocolIdentifier;
 		private AsteriskVersion asteriskVersion;
 		private Dictionary<int, IResponseHandler> responseHandlers;
+		private Dictionary<int, IResponseHandler> pingHandlers;
 		private Dictionary<int, IResponseHandler> responseEventHandlers;
 		private int pingInterval = 10000;
 
@@ -407,8 +408,10 @@ namespace Asterisk.NET.Manager
 			socketEncoding = Encoding.ASCII;
 
 			responseHandlers = new Dictionary<int, IResponseHandler>();
+			pingHandlers = new Dictionary<int, IResponseHandler>();
 			responseEventHandlers = new Dictionary<int, IResponseHandler>();
 			registeredEventClasses = new Dictionary<int, ConstructorInfo>();
+
 			Helper.RegisterBuiltinEventClasses(registeredEventClasses);
 
 			registeredEventHandlers = new Dictionary<int, int>();
@@ -1402,11 +1405,16 @@ namespace Asterisk.NET.Manager
 					else
 						mrReader.Socket = null;
 				}
+
 				if (this.mrSocket != null)
 				{
 					mrSocket.Close();
 					mrSocket = null;
 				}
+
+				responseEventHandlers.Clear();
+				responseHandlers.Clear();
+				pingHandlers.Clear();
 			}
 		}
 		#endregion
@@ -1612,13 +1620,13 @@ namespace Asterisk.NET.Manager
 		/// <param name="action">action to send</param>
 		/// <param name="timeout">timeout in milliseconds</param>
 		/// <returns></returns>
-		public Response.ManagerResponse SendAction(ManagerAction action, int milliseccondsTimeout)
+		public Response.ManagerResponse SendAction(ManagerAction action, int timeOut)
 		{
 			AutoResetEvent autoEvent = new AutoResetEvent(false);
 			ResponseHandler handler = new ResponseHandler(action, autoEvent);
 
 			int hash = SendAction(action, handler);
-			bool result = autoEvent.WaitOne(milliseccondsTimeout <= 0 ? -1 : milliseccondsTimeout, true);
+			bool result = autoEvent.WaitOne(timeOut <= 0 ? -1 : timeOut, true);
 
 			RemoveResponseHandler(handler);
 
@@ -1645,10 +1653,10 @@ namespace Asterisk.NET.Manager
 				responseHandler.Hash = internalActionId.GetHashCode();
 				AddResponseHandler(responseHandler);
 			}
+
 			SendToAsterisk(action, internalActionId);
-			if (responseHandler != null)
-				return responseHandler.Hash;
-			return 0;
+
+			return responseHandler != null ? responseHandler.Hash : 0;
 		}
 		#endregion
 
@@ -1704,7 +1712,12 @@ namespace Asterisk.NET.Manager
 		private void AddResponseHandler(IResponseHandler handler)
 		{
 			lock (lockHandlers)
+			{
+				if (handler.Action is PingAction)
+					pingHandlers[handler.Hash] = handler;
+				else
 				responseHandlers[handler.Hash] = handler;
+		}
 		}
 
 		private void AddResponseEventHandler(IResponseHandler handler)
@@ -1779,6 +1792,7 @@ namespace Asterisk.NET.Manager
 		#endregion
 
 		#region SendToAsterisk(ManagerAction action, string internalActionId)
+
 		internal void SendToAsterisk(ManagerAction action, string internalActionId)
 		{
 			if (mrSocket == null)
@@ -1788,8 +1802,19 @@ namespace Asterisk.NET.Manager
 #if LOGGER
 			logger.Debug("Sent action : '{0}' : {1}", internalActionId, action);
 #endif
+			if (sa == null)
+				sa = new SendToAsteriskDelegate(sendToAsterisk);
+			sa.Invoke(buffer);
+		}
+
+		private delegate void SendToAsteriskDelegate(string buffer);
+		private SendToAsteriskDelegate sa = null;
+
+		private void sendToAsterisk(string buffer)
+		{
 			mrSocket.Write(buffer);
 		}
+
 		#endregion
 
 		#region BuildAction(action)
@@ -1950,6 +1975,7 @@ namespace Asterisk.NET.Manager
 #endif
 			DispatchResponse(buffer, null);
 		}
+
 		internal void DispatchResponse(ManagerResponse response)
 		{
 #if LOGGER
@@ -1957,6 +1983,7 @@ namespace Asterisk.NET.Manager
 #endif
 			DispatchResponse(null, response);
 		}
+
 		internal void DispatchResponse(Dictionary<string, string> buffer, ManagerResponse response)
 		{
 			string responseActionId = string.Empty;
@@ -1964,10 +1991,12 @@ namespace Asterisk.NET.Manager
 			IResponseHandler responseHandler = null;
 
 			if (buffer != null)
+			{
 				if (buffer["response"].ToLower(Helper.CultureInfo) == "error")
 					response = new ManagerError(buffer);
 				else if (buffer.ContainsKey("actionid"))
 					actionId = buffer["actionid"];
+			}
 
 			if (response != null)
 				actionId = response.ActionId;
@@ -2005,6 +2034,13 @@ namespace Asterisk.NET.Manager
 #endif
 					}
 				}
+			}
+			else if (response == null && buffer.ContainsKey("ping") && buffer["ping"] == "Pong")
+			{
+				response = Helper.BuildResponse(buffer);
+				foreach (ResponseHandler pingHandler in pingHandlers.Values)
+					pingHandler.HandleResponse(response);
+				pingHandlers.Clear();
 			}
 
 			if (!reconnected)
