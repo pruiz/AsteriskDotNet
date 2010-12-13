@@ -31,6 +31,7 @@ namespace Asterisk.NET.Manager
 	public delegate void AlarmClearEventHandler(object sender, Event.AlarmClearEvent e);
 	public delegate void AlarmEventHandler(object sender, Event.AlarmEvent e);
 	public delegate void CdrEventHandler(object sender, Event.CdrEvent e);
+	public delegate void CelEventHandler(object sender, Event.CelEvent e);
 	public delegate void DBGetResponseEventHandler(object sender, Event.DBGetResponseEvent e);
 	public delegate void DialEventHandler(object sender, Event.DialEvent e);
 	public delegate void DNDStateEventHandler(object sender, Event.DNDStateEvent e);
@@ -195,6 +196,7 @@ namespace Asterisk.NET.Manager
 		/// An AlarmEvent is triggered when a Zap channel enters or changes alarm state.
 		/// </summary>
 		public event AlarmEventHandler Alarm;
+		public event CelEventHandler Cel;
 		/// <summary>
 		/// A CdrEvent is triggered when a call detail record is generated, usually at the end of a call.
 		/// </summary>
@@ -430,6 +432,8 @@ namespace Asterisk.NET.Manager
 			Helper.RegisterEventHandler(registeredEventHandlers, 10, typeof(AlarmClearEvent));
 			Helper.RegisterEventHandler(registeredEventHandlers, 11, typeof(AlarmEvent));
 			Helper.RegisterEventHandler(registeredEventHandlers, 12, typeof(CdrEvent));
+			
+			Helper.RegisterEventHandler(registeredEventHandlers, 13, typeof(CelEvent));
 
 			Helper.RegisterEventHandler(registeredEventHandlers, 14, typeof(DBGetResponseEvent));
 			Helper.RegisterEventHandler(registeredEventHandlers, 15, typeof(DialEvent));
@@ -672,6 +676,13 @@ namespace Asterisk.NET.Manager
 						if (Cdr != null)
 						{
 							Cdr(this, (CdrEvent)e);
+							return;
+						}
+						break;
+					case 13:
+						if (Cel != null)
+						{
+							Cel(this, (CelEvent)e);
 							return;
 						}
 						break;
@@ -1305,6 +1316,8 @@ namespace Asterisk.NET.Manager
 								return AsteriskVersion.ASTERISK_1_4;
 							else if (version.StartsWith("1.6."))
 								return AsteriskVersion.ASTERISK_1_6;
+							else if (version.StartsWith("1.8."))
+								return AsteriskVersion.ASTERISK_1_8;
 							else
 								throw new ManagerException("Unknown Asterisk version " + version);
 						}

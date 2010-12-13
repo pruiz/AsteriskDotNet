@@ -169,6 +169,7 @@
     <Compile Include="Manager\Event\BridgeEvent.cs" />
     <Compile Include="Manager\Event\ChannelReloadEvent.cs" />
     <Compile Include="Manager\Event\ChannelUpdateEvent.cs" />
+    <Compile Include="Manager\Event\CelEvent.cs" />
     <Compile Include="Manager\Event\MeetmeMuteEvent.cs" />
     <Compile Include="Manager\Event\DTMFEvent.cs" />
     <Compile Include="Manager\Event\FaxReceivedEvent.cs" />

@@ -19,6 +19,7 @@ namespace Asterisk.NET.Manager.Event
 		private double timestamp;
 
 		private string uniqueId;
+		private string linkedId;
 		private string channel;
 		private ManagerConnection src;
 		protected Dictionary<string, string> attributes;
@@ -123,7 +124,15 @@ namespace Asterisk.NET.Manager.Event
 		}
 		#endregion
 
-		#region Channel 
+		#region LinkedId
+		public string LinkedId
+		{
+			get { return linkedId; }
+			set { this.linkedId = value; }
+		}
+		#endregion
+
+		#region Channel
 		/// <summary>
 		/// Get/Set the name of the channel.
 		/// </summary>
