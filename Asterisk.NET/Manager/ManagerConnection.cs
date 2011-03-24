@@ -1999,6 +1999,7 @@ namespace Asterisk.NET.Manager
 
 		internal void DispatchResponse(Dictionary<string, string> buffer, ManagerResponse response)
 		{
+			bool handled = false;
 			string responseActionId = string.Empty;
 			string actionId = string.Empty;
 			IResponseHandler responseHandler = null;
@@ -2048,7 +2049,8 @@ namespace Asterisk.NET.Manager
 					}
 				}
 			}
-			else if (response == null && buffer.ContainsKey("ping") && buffer["ping"] == "Pong")
+			
+			if (response == null && buffer.ContainsKey("ping") && buffer["ping"] == "Pong")
 			{
 				response = Helper.BuildResponse(buffer);
 				foreach (ResponseHandler pingHandler in pingHandlers.Values)
