@@ -18,7 +18,7 @@ namespace Asterisk.NET.FastAGI
 	public class MappingStrategy
 	{
 #if LOGGER
-		private Logger logger = Logger.Instance();
+		private ILogger logger = Logger.Instance();
 #endif
 		private string resourceName;
 		private Hashtable mapping;

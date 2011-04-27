@@ -18,7 +18,7 @@ namespace Asterisk.NET.Manager
 	public class ManagerReader
 	{
 #if LOGGER
-		private Logger logger = Logger.Instance();
+		private ILogger logger = Logger.Instance();
 #endif
 
 		private ManagerConnection mrConnector;
@@ -204,6 +204,7 @@ namespace Asterisk.NET.Manager
 							else if (disconnect)
 							{
 								disconnect = false;
+								logger.Debug("disconnect=true, disconnecting..");
 								mrConnector.DispatchEvent(new DisconnectEvent(mrConnector));
 							}
 						}
@@ -222,6 +223,7 @@ namespace Asterisk.NET.Manager
 									if (pingHandler.Response == null)
 									{
 										// If one PingInterval from Ping without Pong then send Disconnect event
+										logger.Warning("PingInterval timeout, disconnecting..");
 										mrConnector.DispatchEvent(new DisconnectEvent(mrConnector));
 									}
 									pingHandler.Free();
@@ -233,6 +235,7 @@ namespace Asterisk.NET.Manager
 									// Send PING to *
 									try
 									{
+										logger.Debug("Sending ping request..");
 										pingHandler = new ResponseHandler(new Action.PingAction(), null);
 										mrConnector.SendAction(pingHandler.Action, pingHandler);
 									}

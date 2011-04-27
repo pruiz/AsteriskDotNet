@@ -12,18 +12,26 @@ namespace Asterisk.NET
 	/// <summary>
 	/// Facade to hide details of the underlying logging system.
 	/// </summary>
-	public sealed class Logger
+	public sealed class Logger : Asterisk.NET.ILogger
 	{
-		private static Logger logger;
+		public delegate ILogger LoggerFactoryDelegate();
+
+		private static ILogger logger;
+		public static LoggerFactoryDelegate LoggerFactory = null;
 
 		/// <summary>
 		/// Returns an instance of Log suitable for logging from the given class.
 		/// </summary>
 		/// <returns> the created logger.</returns>
-		public static Logger Instance()
+		public static ILogger Instance()
 		{
-			if(logger == null)
-				logger = new Logger();
+			if (logger == null)
+			{
+				if (LoggerFactory != null)
+					logger = LoggerFactory();
+				else
+					logger = new Logger();
+			}
 			return logger;
 		}
 

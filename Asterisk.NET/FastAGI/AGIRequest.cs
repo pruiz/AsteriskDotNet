@@ -16,7 +16,7 @@ namespace Asterisk.NET.FastAGI
 	{
 		#region Variables
 #if LOGGER
-		private Logger logger = Logger.Instance();
+		private ILogger logger = Logger.Instance();
 #endif
 		private string rawCallerId;
 		private Dictionary<string, string> request;

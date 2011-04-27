@@ -17,7 +17,7 @@ namespace Asterisk.NET
 	{
 		private static CultureInfo defaultCulture;
 #if LOGGER
-		private static Logger logger = Logger.Instance();
+		private static ILogger logger = Logger.Instance();
 #endif
 
 		#region CultureInfo 

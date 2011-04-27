@@ -8,7 +8,7 @@ namespace Asterisk.NET.FastAGI
 	public class AGIReader
 	{
 #if LOGGER
-		private Logger logger = Logger.Instance();
+		private ILogger logger = Logger.Instance();
 #endif
 		private IO.SocketConnection socket;
 		public AGIReader(IO.SocketConnection socket)

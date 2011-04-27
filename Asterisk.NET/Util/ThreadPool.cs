@@ -11,7 +11,7 @@ namespace Asterisk.NET.Util
 	public class ThreadPool
 	{
 #if LOGGER
-		private Logger logger = Logger.Instance();
+		private ILogger logger = Logger.Instance();
 #endif
 		private bool running;
 		private int numThreads;

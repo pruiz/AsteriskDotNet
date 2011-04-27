@@ -118,6 +118,7 @@
     <Compile Include="FastAGI\Exceptions\InvalidOrUnknownCommandException.cs" />
     <Compile Include="FastAGI\MappingStrategy.cs" />
     <Compile Include="FastAGI\Script\AGINoAction.cs" />
+    <Compile Include="ILogger.cs" />
     <Compile Include="IO\ServerSocket.cs" />
     <Compile Include="IO\SocketConnection.cs" />
     <Compile Include="IParseSupport.cs" />

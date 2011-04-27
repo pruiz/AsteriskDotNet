@@ -89,7 +89,7 @@ namespace Asterisk.NET.Manager
 		#region Variables
 
 #if LOGGER
-		private Logger logger = Logger.Instance();
+		private ILogger logger = Logger.Instance();
 #endif
 		private long actionIdCount = 0;
 		private string hostname;
@@ -1999,7 +1999,6 @@ namespace Asterisk.NET.Manager
 
 		internal void DispatchResponse(Dictionary<string, string> buffer, ManagerResponse response)
 		{
-			bool handled = false;
 			string responseActionId = string.Empty;
 			string actionId = string.Empty;
 			IResponseHandler responseHandler = null;
@@ -2226,18 +2225,23 @@ namespace Asterisk.NET.Manager
 
 			if (reconnected && e is DisconnectEvent)
 			{
+				logger.Debug("Reconnected to asterisk, sending DisconnectEvent (reconnect=true)..");
 				((DisconnectEvent)e).Reconnect = true;
 				fireEvent(e);
 				reconnect(false);
 			}
 			else if (!reconnected && reconnectEnable && (e is DisconnectEvent || e is ReloadEvent || e is ShutdownEvent))
 			{
+				logger.Debug("Disconnected from asterisk (reconnect=true)..");
 				((ConnectionStateEvent)e).Reconnect = true;
 				fireEvent(e);
 				reconnect(true);
 			}
 			else
+			{
+				logger.Debug("Received ConnectionStateEvent, dispatching it..");
 				fireEvent(e);
+			}
 		}
 
 		private void eventComplete(IAsyncResult result)

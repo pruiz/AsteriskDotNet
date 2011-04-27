@@ -13,7 +13,7 @@ namespace Asterisk.NET.FastAGI
 	public class AGIConnectionHandler
 	{
 #if LOGGER
-		private Logger logger = Logger.Instance();
+		private ILogger logger = Logger.Instance();
 #endif
 		private static readonly LocalDataStoreSlot channel = Thread.AllocateDataSlot();
 		private IO.SocketConnection socket;

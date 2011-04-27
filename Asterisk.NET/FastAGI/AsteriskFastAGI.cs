@@ -8,7 +8,7 @@ namespace Asterisk.NET.FastAGI
 	{
 		#region Variables
 #if LOGGER
-		private Logger logger = Logger.Instance();
+		private ILogger logger = Logger.Instance();
 #endif
 		private IO.ServerSocket serverSocket;
 
